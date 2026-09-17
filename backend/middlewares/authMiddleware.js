@@ -1,28 +1,29 @@
 import jwt from "jsonwebtoken";
 import customerModel from "../models/customerModel.js";
 
-const isAuthenticated = async (req, res, next) =>{
-    try{
-        const token=req.cookie.token;
+const isAuthenticated = async (req, res, next) => {
+    try {
+        const token = req.cookies.token;
 
-    if(!token){
-        return res.status(401).json({ message: "Login required" });
-    }
+        if (!token) {
+            return res.status(401).json({ message: "Login required" });
+        }
 
-    const decoded= jwt.verify(token,process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const customerExsits = await customerModel.findByID(decodec.userId);
+        const customerExists = await customerModel
+            .findById(decoded.userId)
+            .select("-password");
 
-    if(!customerExsits){
-         return res.status(401).json({ message: "Customer not found" });
-    }
+        if (!customerExists) {
+            return res.status(401).json({ message: "Customer not found" });
+        }
 
-    req.customer = customerExsits;
-    next();
-    }catch (err) {
+        req.user = customerExists;
+        next();
+    } catch (err) {
         return res.status(401).json({ message: "Invalid or expired token" });
     }
 };
 
 export default isAuthenticated;
-    

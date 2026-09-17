@@ -44,9 +44,7 @@ export const registerCustomer = async (req, res) => {
 
         const token = generateToken(newCustomer._id);
 
-        res.cookie("token", token, cookieOptions);
-
-        return res.status(201).json({
+        return res.cookie("token", token, cookieOptions).status(201).json({
             message: "Registration successful",
             Customer: {
                 _id: newCustomer._id,
@@ -124,7 +122,11 @@ export const getMe = (req, res) => {
 };
 
 export const logoutCustomer = (req, res) => {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false
+    });
 
     return res.status(200).json({
         message: "Logged out successfully"
